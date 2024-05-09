@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Chat App</title>
+  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="script.js"></script>
+  <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <header>
+        <div id="cms">CMS</div>
+        
+        <div class="dropdown-container">
+
+            <div class="notify-dropdown">
+                <button id="notificationBtn">
+                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    <span class="icon-button-badge"></span>
+                </button>
+                <div class="notify-content">
+                    <a href="mailto: johnsmith@gmail.com">
+                        <i class="fa-regular fa-user"></i> 
+                        John: What`s up?
+                    </a>
+                    <a href="mailto:annbond@gmail.com">
+                        <i class="fa-regular fa-user"></i> 
+                        Ann: Hello!
+                    </a>
+                </div>
+            </div>
+    
+            <div class="user-dropdown">
+                <button id="userBtn">
+                    <img id="profilePicture" src="/images/James-Bond.jpg" alt="Profile picture">
+                    <h4 id="username">James Bond</h4>
+                </button>
+                <div class="user-content">
+                    <a href="#">Profile</a>
+                    <a href="#">Log out</a>
+                </div>
+            </div>
+    
+        </div>
+
+    </header>
+
+    <main>
+
+        <div class="navigation">
+            <input type="checkbox" class="toggle" id="toggle-checkbox">
+            <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
+    
+            <nav class="navbar">
+                <ul>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Students</a></li>
+                    <li><a href="#">Tasks</a></li>
+                    <li><a href="#">Log out</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <h1>Messages</h1>
+
+        <div class="messager-container">
+
+        <div class="chats-list-container"> 
+          <p>Rooms list</p>
+          <form id="create-room-container">
+            <input type="text" id="room-name-input">
+            <button type="submit" id="create-room-button">+ new room</button>
+          </form>
+        </div>
+        
+        <div class="chat-container">
+          <p>Main chat</p>
+          
+          <div id="message-container"></div>
+            <form id="send-container">
+              <input type="text" id="message-input">
+              <button type="submit" id="send-button">Send</button>
+            </form>
+        </div>
+
+      </div>
+
+    </main>
+</body>
+</html>
