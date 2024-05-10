@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Chat App</title>
-  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script defer src="http://localhost:4444/socket.io/socket.io.js"></script>
   <script defer src="script.js"></script>
   <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/style.css">
@@ -71,25 +71,29 @@
 
         <div class="messager-container">
 
-        <div class="chats-list-container"> 
-          <p>Rooms list</p>
-          <form id="create-room-container">
-            <input type="text" id="room-name-input">
-            <button type="submit" id="create-room-button">+ new room</button>
-          </form>
+        <div class="chat-room-container"> 
+          <span class="chat-room-title">Chat rooms</span>
+          <div id="chat-rooms-list"></div>
         </div>
         
         <div class="chat-container">
-          <p>Main chat</p>
+            <div class="chat-name"><span>Chat room Admin</span></div>
+
+            <div class="members-list">
+                <div class="members-title"><span>Members</span></div>
+                <div id="members-names">
+                </div> 
+            </div>
           
-          <div id="message-container"></div>
+            <div class="chat-messages-title"><span>Messages</span></div>
+            <div id="message-container"></div>
             <form id="send-container">
               <input type="text" id="message-input">
               <button type="submit" id="send-button">Send</button>
             </form>
         </div>
 
-      </div>
+        </div>
 
     </main>
 </body>

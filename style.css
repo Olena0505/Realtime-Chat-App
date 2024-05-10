@@ -21,78 +21,6 @@ input:hover{
     background-color: #e0e0e0;
 }
 
-/* CHAT */
-
-.messager-container {
-    display: flex;
-}
-
-.chats-list-container {
-    margin-right: 10px;
-    flex: 30%; 
-}
-
-.chat-container {
-    flex: 70%; 
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column; 
-}
-
-#message-container {
-    width: 100%; 
-    max-width: 1200px;
-}
-
-#message-container div {
-    background-color: #CCC;
-    padding: 5px;
-}
-
-#message-container div:nth-child(2n) {
-    background-color: #FFF;
-}
-
-#send-container {
-    padding-bottom: 30px;
-    background-color: white;
-    width: 100%; 
-    max-width: 1200px;
-    display: flex;
-}
-
-#message-input {
-    flex-grow: 1;
-}
-
-#create-room-container {
-    width: 70%; 
-    max-width: 150px;
-}
-
-#create-room-container div {
-    background-color: #CCC;
-    padding: 5px;
-}
-
-#create-room-container div:nth-child(2n) {
-    background-color: #FFF;
-}
-
-#create-room-container {
-    padding-bottom: 30px;
-    background-color: white;
-    width: 100%; 
-    max-width: 1000px;
-    display: flex;
-}
-
-#room-name-input {
-    width: 70px;
-    flex-grow: 1;
-}
-
 /* HEADER */
 
 header {
@@ -554,4 +482,56 @@ hr {
 
 .modal .hidden{
     display: none !important;
+}
+
+/* CHAT */
+
+.messager-container {
+    display: flex;
+}
+
+.chat-room-container {
+    margin-top: 15px;
+    margin-right: 10px;
+    flex: 30%; 
+}
+
+.chat-container {
+    flex: 70%; 
+    padding: 0;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column; 
+}
+
+#messager-container span{
+    font-size: 25 !important;
+    font-weight: bold !important;
+    margin: 25px;
+}
+
+#message-container {
+    width: 100%; 
+    max-width: 1200px;
+}
+
+#message-container div {
+    background-color: #CCC;
+    padding: 5px;
+}
+
+#message-container div:nth-child(2n) {
+    background-color: #FFF;
+}
+
+#send-container {
+    padding-bottom: 30px;
+    background-color: white;
+    width: 100%; 
+    max-width: 1200px;
+    display: flex;
+}
+
+#message-input {
+    flex-grow: 1;
 }
