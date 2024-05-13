@@ -1,74 +1,78 @@
-const socket = io('http://localhost:4444');
+const socket = io('http://localhost:3000');
 const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-container');
 const messageInput = document.getElementById('message-input');
-const chatMembersNames = document.getElementById('members-names');
+const chatMembers = document.getElementById('members-icons');
 const roomsList = document.getElementById('chat-rooms-list');
 
 const userName = prompt('What is your name?');
 socket.emit('new-user', userName);
 let currentChatRoomId = null;
-let chatRoomList = {};
-let myId = 0;
+let chatRoomsList = {};
+let userId = null;
 
 socket.on('user-connected', data => {
-  const allChatElement = addGroup(0, "All");
-  chatRoomList[0] = [];
-  roomsList.appendChild(allChatElement);
+  const adminChatElement = addChatRoom(0, "Admin");
+  adminChatElement.classList.add('selected-chat-room');
+  chatRoomsList[0] = [];
+  currentChatRoomId = 0;
+  roomsList.appendChild(adminChatElement);
 
-  myId = data.id;
-
+  userId = data.id;
   for (let socketId in data.usersList) {
+    appendMember(data.usersList[socketId], socketId);
     if (socketId === data.id) {
       continue;
     }
-    chatRoomList[socketId] = [];
-    const groupElement = addGroup(socketId, data.usersList[socketId]);
+    chatRoomsList[socketId] = [];
+    const groupElement = addChatRoom(socketId, data.usersList[socketId]);
     roomsList.appendChild(groupElement);
   }
 });
 
-function addGroup(id, name) {
-  const groupElement = document.createElement('div');
-  groupElement.classList.add('room');
-  groupElement.setAttribute('data-id', id);
-  groupElement.setAttribute('data-name', name);
-  groupElement.innerHTML = `
-    <span>${name}</span>
-  `;
-  return groupElement;
-}
-
 socket.on('chat-message', data => {
-  console.log(data.targetRoomId);
-  console.log(chatRoomList); 
-  chatRoomList[data.targetRoomId].push(data.message);
-  if (data.currentChatRoomId == data.targetRoomId) {
+  chatRoomsList[data.targetRoomId].push(data.message);
+  if (currentChatRoomId == data.targetRoomId) {
     appendMessage(data.message);
   }
 });
 
-
 socket.on("new-chat", data => {
-  chatRoomList[data.id] = [];
-  let newGroup = addGroup(data.id, data.name);
+  chatRoomsList[data.id] = [];
+  let newGroup = addChatRoom(data.id, data.name);
   roomsList.append(newGroup);
 
   if(currentChatRoomId == 0) {
-    appendMember(data.name);
+    appendMember(data.name, data.id);
   }
 })
+
+socket.on('all-members', allUsers => {
+  let listOfMembers = {};
+  listOfMembers = allUsers;
+  setMembers(listOfMembers);
+})
+
+socket.on('user-disconnected', socketId => {
+  delete chatRoomsList[socketId];
+  let chatElements = document.querySelectorAll(`div[data-id=${socketId}]`);
+    chatElements.forEach(chatElement => {
+        chatElement.parentNode.removeChild(chatElement);
+    });
+
+  if(currentChatRoomId == socketId){
+    openChatRoom(0, 'Admin');
+  }
+});
 
 messageForm.addEventListener('submit', e => {
   e.preventDefault();
   const message = messageInput.value;
-  let messageInfo = {id: myId, senderName: userName, message: message};
-  console.log(chatRoomList);
-  chatRoomList[currentChatRoomId].push(messageInfo);
+  let messageInfo = {id: userId, senderName: userName, message: message};
+  chatRoomsList[currentChatRoomId].push(messageInfo);
   appendSelfMessage(messageInfo);
 
-  console.log("room : " + currentChatRoomId);
-  const dataToSend = {messageInfo: messageInfo, targetRoomId: myId};
+  const dataToSend = {messageInfo: messageInfo, targetRoomId: userId};
   if(currentChatRoomId == 0){
     dataToSend.targetRoomId = 0;
   }
@@ -77,83 +81,123 @@ messageForm.addEventListener('submit', e => {
   messageInput.value = '';
 })
 
-function appendMessage(messageData) {
-  const messageElement = document.createElement('div');
-  messageElement.innerText = `${messageData.senderName}: ${messageData.message}`;
-  messageContainer.appendChild(messageElement);
-}
-
-function appendSelfMessage(messageData) {
-  const messageElement = document.createElement('div');
-  messageElement.innerText = `You: ${messageData.message}`;
-  messageContainer.append(messageElement);
-}
-
 roomsList.addEventListener('click', function(event) {
   if (event.target.classList.contains('room')) {
     let id = event.target.getAttribute('data-id');
     let name = event.target.getAttribute('data-name');
-
-    if (currentChatRoomId == id) {
-      return;
-    }
-
-    currentChatRoomId = id;
-
-    document.querySelector('.chat-name').textContent = `Chat room ${name}`;
-
-    messageContainer.innerHTML = '';
-
-    chatRoomList[id].forEach(messageInfo => {
-      if (messageInfo.id == myId) {
-        appendSelfMessage(messageInfo);
-      } else {
-        appendMessage(messageInfo);
-      }
-    });
-
-    if (id == 0) {
-      socket.emit('get-all-members');
-    } else {
-      let listOfMembers = {};
-      listOfMembers[id] = name;
-      listOfMembers[myId] = userName;
-      setMembers(listOfMembers);
-    }
+    openChatRoom(id, name);
   }
 });
 
-
-socket.on('all-members', allUsers => {
-  let listOfMembers = {};
-  listOfMembers = allUsers;
-  setMembers(listOfMembers);
-})
-
-function setMembers(listOfMembers) {
-  while (chatMembersNames.firstChild) {
-    chatMembersNames.removeChild(chatMembersNames.firstChild);
+function openChatRoom(id, name) {
+  if (currentChatRoomId === id) {
+      return;
   }
-  for (let socketId in listOfMembers) {
-    appendMember(listOfMembers[socketId]);
+  currentChatRoomId = id;
+
+  const roomElements = document.querySelectorAll('.room');
+  roomElements.forEach(room => {
+      if (room.getAttribute('data-id') == id) {
+          room.classList.add('selected-chat-room');
+      } else {
+          room.classList.remove('selected-chat-room');
+      }
+  });
+
+  document.querySelector('.chat-name').textContent = `Chat room ${name}`;
+  messageContainer.innerHTML = '';
+  chatRoomsList[currentChatRoomId].forEach(messageInfo => {
+      if (messageInfo.id === userId) {
+          appendSelfMessage(messageInfo);
+      } else {
+          appendMessage(messageInfo);
+      }
+  });
+
+  if (id == 0) {
+    socket.emit('get-all-members');
+  } else {
+    let listOfMembers = {};
+    listOfMembers[id] = name;
+    listOfMembers[userId] = userName;
+    setMembers(listOfMembers);
   }
 }
 
-function appendMember(name) {
-  const memberElement = document.createElement('div');
-  memberElement.classList.add('chat-user');
-  memberElement.innerHTML = `
+function addChatRoom(id, name) {
+  const groupElement = document.createElement('div');
+  groupElement.classList.add('room');
+  groupElement.setAttribute('data-id', id);
+  groupElement.setAttribute('data-name', name);
+  groupElement.innerHTML = `
+    <span>
+      <i class="fa-solid fa-circle-user fa-2xl" style="color: #ffffff;"></i>
+    </span> 
     <span>
       ${name}
     </span>
   `;
-  chatMembersNames.appendChild(memberElement);
+  return groupElement;
 }
 
-socket.on('user-disconnected', socketId => {
-  delete chatRoomList[socketId];
-  let chatToDelete = document.querySelector('div[data-id="' + socketId + '"]');
-  if (chatToDelete) {
-    chatToDelete.parentNode.removeChild(chatToDelete);
+function setMembers(listOfMembers) {
+  while (chatMembers.firstChild) {
+    chatMembers.removeChild(chatMembers.firstChild);
   }
-});
+  for (let socketId in listOfMembers) {
+    appendMember(listOfMembers[socketId], socketId);
+  }
+}
+
+function appendMember(name, id) {
+  const memberElement = document.createElement('div');
+  memberElement.classList.add('chat-user');
+  memberElement.setAttribute('data-id', id);
+  memberElement.innerHTML = `
+    <span>
+      <i class="fa-solid fa-circle-user fa-2xl" style="color: #b3b3b3;"></i>
+    </span> 
+    <span class="member-name">
+      ${name}
+    </span>
+  `;
+  chatMembers.appendChild(memberElement);
+}
+
+function appendMessage(messageInfo) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message-box');
+  messageElement.innerHTML = `
+    <div class="chat-user">
+      <span>
+        <i class="fa-solid fa-circle-user fa-2xl" style="color: #b3b3b3;"></i>
+      </span> 
+      <span class="member-name">
+        ${messageInfo.senderName}
+      </span>
+    </div>
+    <div class="chat-message">
+      <span>${messageInfo.message}</span>
+    </div>
+  `;
+  messageContainer.appendChild(messageElement);
+}
+
+function appendSelfMessage(messageInfo) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message-box', 'self-message-box');
+  messageElement.innerHTML = `
+    <div class="chat-message self-message">
+      <span>${messageInfo.message}</span>
+    </div>
+    <div class="chat-user">
+      <span>
+        <i class="fa-solid fa-circle-user fa-2xl" style="color: #b3b3b3;"></i>
+      </span> 
+      <span class="member-name">
+        You
+      </span>
+    </div>
+  `;  
+  messageContainer.appendChild(messageElement);
+}

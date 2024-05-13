@@ -1,21 +1,20 @@
-const express = require('express')
-const app = express()
-const server = require('http').Server(app)
-const io = require('socket.io')(
-  server, {
+const { table } = require('console');
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer();
+const io = socketIo(server, {
   cors: {
     origin: '*',
   }
-})
+});
 
-const PORT = 4444;
+const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
 const users = {};
 io.on('connection', socket => {
-
   socket.on('new-user', name => {
     users[socket.id] = name;
     socket.emit('user-connected', {   
@@ -26,7 +25,11 @@ io.on('connection', socket => {
   });
 
   socket.on('send-chat-message', data => {
-    socket.broadcast.emit('chat-message', { message: data.messageInfo, targetRoomId: data.targetRoomId });
+    if (data.targetRoomId === 0) {
+      socket.broadcast.emit('chat-message', { message: data.messageInfo, targetRoomId: data.targetRoomId });
+    } else {
+      io.to(data.targetRoomId).emit('chat-message', { message: data.messageInfo, targetRoomId: data.targetRoomId });
+    }
   });
 
   socket.on('get-all-members', () => {
@@ -37,5 +40,4 @@ io.on('connection', socket => {
     socket.broadcast.emit('user-disconnected', socket.id);
     delete users[socket.id];
   });
-
 });
